@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المخلوقات السامة في العراق: العقارب، العناكب، والأفاعي</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css">
+    <style>
+        /* --- نفس الأنماط الأساسية مع بعض التعديلات --- */
+        body {
+            font-family: 'Tahoma', 'Segoe UI', Geneva, Verdana, sans-serif; /* خط مناسب للعربية */
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .section-title {
+            border-bottom: 3px solid #8b5cf6;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+        .creature-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+        }
+        .creature-card:focus-visible {
+            outline-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.5);
+        }
+        .creature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .creature-card img {
+            transition: transform 0.5s ease;
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+        .creature-card:hover img {
+            transform: scale(1.05);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* منع التمرير المبدئي */
+            background-color: rgba(0,0,0,0.8);
+            transition: opacity 0.3s ease;
+            opacity: 0; /* ابدأ مخفياً */
+        }
+        .modal.active {
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             opacity: 1;
+             overflow: auto; /* اسمح بالتمرير عند التفعيل */
+        }
+        .modal-content {
+            background-color: #fefefe;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 900px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            position: relative;
+            animation: modalopen 0.4s ease-out;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .close {
+            position: absolute;
+            /* تعديل لـ RTL */
+            left: 15px;
+            right: auto;
+            top: 10px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #888;
+            line-height: 1;
+            padding: 5px;
+            cursor: pointer;
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+        .close:hover,
+        .close:focus-visible {
+            color: #000;
+            text-decoration: none;
+        }
+         .close:focus-visible {
+             outline-color: #8b5cf6;
+             box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.5);
+         }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* عمود واحد افتراضي */
+            grid-gap: 20px;
+        }
+         @media (min-width: 768px) {
+             .info-grid {
+                grid-template-columns: 2fr 1fr; /* تعديل ترتيب الأعمدة لـ RTL */
+             }
+         }
+        .info-img {
+            width: 100%;
+            height: auto;
+            max-height: 350px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        .toxicity-high {
+            background-color: #ef4444;
+            color: white;
+        }
+        .toxicity-medium {
+            background-color: #f59e0b;
+            color: white;
+        }
+        .info-item {
+            margin-bottom: 15px;
+             /* تعديل لـ RTL */
+            border-right: 4px solid #8b5cf6;
+            border-left: none;
+            padding-right: 10px;
+            padding-left: 0;
+        }
+         .info-item ul {
+             /* تعديل لـ RTL */
+             padding-right: 20px; /* بدلًا من padding-left */
+             padding-left: 0;
+             list-style-position: outside; /* لضمان ظهور النقاط بشكل صحيح */
+         }
+        @keyframes modalopen {
+            from {opacity: 0; transform: scale(0.95) translateY(-20px);}
+            to {opacity: 1; transform: scale(1) translateY(0);}
+        }
+        .printed-version {
+            display: none;
+        }
+        @media print {
+            /* --- أنماط الطباعة المحسنة --- */
+             html, body { direction: rtl; } /* تأكيد الاتجاه للطباعة */
+            .no-print { display: none !important; }
+            .printed-version { display: block !important; }
+            body, .pdf-container, .modal-content {
+                background-color: #fff !important;
+                color: #000 !important;
+                box-shadow: none !important;
+                margin: 0 !important;
+                padding: 15px !important; /* إضافة هوامش بسيطة */
+                font-size: 10pt; /* حجم خط مناسب للطباعة */
+            }
+            .creature-card, .modal, header, footer, .bg-purple-100 {
+                 display: none !important;
+            }
+            .pdf-container {
+                 max-width: 100% !important;
+            }
+             .printed-version img {
+                 max-width: 250px; /* تصغير حجم الصور للطباعة */
+                 height: auto;
+                 border-radius: 4px;
+                 border: 1px solid #eee; /* حد بسيط حول الصورة */
+                 margin-bottom: 10px;
+             }
+             .printed-version .grid {
+                 grid-template-columns: 1fr !important;
+                 gap: 15px; /* تقليل الفجوة */
+             }
+             .printed-version .mb-8 {
+                 page-break-inside: avoid;
+                 margin-bottom: 20px; /* تقليل الهامش السفلي */
+                 padding-top: 15px;
+             }
+             .printed-version h4 {
+                 font-size: 14pt; /* تكبير عنوان القسم قليلاً */
+                 margin-bottom: 10px;
+             }
+             .toxicity-high, .toxicity-medium {
+                 -webkit-print-color-adjust: exact !important;
+                 print-color-adjust: exact !important;
+                 border: 1px solid #ccc;
+                 display: inline-block; /* لضمان ظهور الخلفية */
+                 padding: 2px 6px !important; /* تعديل الحشو */
+                 font-size: 9pt;
+             }
+              .printed-version p { line-height: 1.4; } /* تحسين قراءة النص */
+        }
+        .overlay-text {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            text-align: center; /* توسيط النص */
+        }
+        .creature-card:hover .overlay-text,
+        .creature-card:focus-visible .overlay-text {
+            opacity: 1;
+        }
+        .pdf-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        /* أيقونة font awesome */
+        .fa-info-circle, .fa-exclamation-triangle {
+            margin-left: 8px; /* تعديل لـ RTL */
+            margin-right: 0;
+        }
+        .text-red-600 { color: #dc2626; } /* تعريف احتياطي للون */
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="pdf-container">
+        <!-- Header -->
+        <header class="bg-purple-900 text-white text-center py-8 px-4 no-print">
+            <h1 class="text-4xl font-bold mb-2">المخلوقات السامة في العراق</h1>
+            <h2 class="text-2xl">العقارب، العناكب، والأفاعي</h2>
+            <p class="mt-4 text-gray-300">دليل تفاعلي للأنواع السامة الخطرة الموجودة في العراق</p>
+        </header>
+
+        <main class="container mx-auto px-4 py-8">
+            <!-- قسم العقارب -->
+            <section class="mb-16">
+                <h2 class="text-3xl font-bold mb-6 section-title">العقارب</h2>
+                <p class="mb-6 text-gray-700">يوجد في العراق عدة أنواع من العقارب السامة، اثنان منها على الأقل لهما أهمية طبية. يمكن لهذه الأنواع أن تسبب لدغات قد تهدد الحياة.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- العقرب العربي ذو الذيل السمين -->
+                    <div class="creature-card bg-white rounded-lg shadow-md overflow-hidden"
+                         role="button" tabindex="0" data-modal-target="scorpion1">
+                        <div class="relative">
+                            <img src="https://www.joelsartore.com/wp-content/uploads/stock/INV003/INV003-00131-1920x1280.jpg" alt="العقرب العربي ذو الذيل السمين" class="w-full">
+                            <div class="overlay-text">
+                                <h3 class="text-lg font-semibold">العقرب العربي ذو الذيل السمين</h3>
+                                <p>اضغط أو انقر للمزيد من التفاصيل</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- عقرب هيميسكربيوس ليبتوروس -->
+                    <div class="creature-card bg-white rounded-lg shadow-md overflow-hidden"
+                         role="button" tabindex="0" data-modal-target="scorpion2">
+                        <div class="relative">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Hemiscorpius_lepturus_%2810.3897-evolsyst.3.37464%29_Figure_24.jpg" alt="عقرب هيميسكربيوس ليبتوروس" class="w-full">
+                            <div class="overlay-text">
+                                <h3 class="text-lg font-semibold">هيميسكربيوس ليبتوروس (العقرب الأصفر)</h3>
+                                <p>اضغط أو انقر للمزيد من التفاصيل</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- قسم العناكب -->
+            <section class="mb-16">
+                 <h2 class="text-3xl font-bold mb-6 section-title">العناكب</h2>
+                 <p class="mb-6 text-gray-700">على الرغم من قلة أنواع العناكب السامة في العراق مقارنة بالعقارب والأفاعي، إلا أن عنكبوت الأرملة السوداء يمثل مصدر قلق طبي كبير.</p>
+
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- عنكبوت الأرملة السوداء -->
+                    <div class="creature-card bg-white rounded-lg shadow-md overflow-hidden"
+                         role="button" tabindex="0" data-modal-target="spider1">
+                        <div class="relative">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/9/9c/Latrodectus_hesperus_Berkeley%2C_California.jpg" alt="عنكبوت الأرملة السوداء" class="w-full">
+                             <div class="overlay-text">
+                                <h3 class="text-lg font-semibold">عنكبوت الأرملة السوداء</h3>
+                                <p>اضغط أو انقر للمزيد من التفاصيل</p>
+                            </div>
+                        </div>
+                    </div>
+                 </div>
+            </section>
+
+            <!-- قسم الأفاعي -->
+            <section class="mb-16">
+                <h2 class="text-3xl font-bold mb-6 section-title">الأفاعي</h2>
+                <p class="mb-6 text-gray-700">يوجد في العراق عدة أنواع من الأفاعي السامة، خاصة الأفاعي الحقيقية (Vipers)، والتي يمكن أن تسبب لدغات قاتلة بدون علاج طبي مناسب.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                     <!-- الأفعى الحارية -->
+                     <div class="creature-card bg-white rounded-lg shadow-md overflow-hidden"
+                         role="button" tabindex="0" data-modal-target="snake1">
+                         <div class="relative">
+                             <img src="https://upload.wikimedia.org/wikipedia/commons/f/ff/Saw-scaled_Viper_%28Echis_carinatus%29_Photographed_By_Shantanu_Kuveskar.jpg" alt="الأفعى الحارية" class="w-full">
+                             <div class="overlay-text">
+                                 <h3 class="text-lg font-semibold">الأفعى الحارية</h3>
+                                 <p>اضغط أو انقر للمزيد من التفاصيل</p>
+                             </div>
+                         </div>
+                     </div>
+
+                    <!-- الأفعى المقرنة -->
+                    <div class="creature-card bg-white rounded-lg shadow-md overflow-hidden"
+                         role="button" tabindex="0" data-modal-target="snake2">
+                        <div class="relative">
+                            <img src="https://c8.alamy.com/comp/P4EMJE/close-up-portrait-of-a-desert-horned-viper-snake-cerastes-cerastes-P4EMJE.jpg" alt="الأفعى المقرنة" class="w-full">
+                             <div class="overlay-text">
+                                <h3 class="text-lg font-semibold">الأفعى المقرنة</h3>
+                                <p>اضغط أو انقر للمزيد من التفاصيل</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- أفعى المشرق -->
+                    <div class="creature-card bg-white rounded-lg shadow-md overflow-hidden"
+                         role="button" tabindex="0" data-modal-target="snake3">
+                        <div class="relative">
+                            <img src="https://images.squarespace-cdn.com/content/v1/654e02304d3a7802ec18d2cd/0a24efcd-1704-43ac-802b-44ebf714f186/Z09_7418+Blunt-Nosed+Viper-Standard-DeNoiseAI-standard.jpeg" alt="أفعى المشرق" class="w-full">
+                             <div class="overlay-text">
+                                <h3 class="text-lg font-semibold">أفعى المشرق</h3>
+                                <p>اضغط أو انقر للمزيد من التفاصيل</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+             <!-- نسخة الطباعة -->
+             <section class="printed-version">
+                <h3 class="text-2xl font-bold mb-4">معلومات تفصيلية لجميع الأنواع</h3>
+ 
+                <div class="mt-8 mb-8 border-t-4 border-purple-600 pt-4">
+                    <h4 class="text-xl font-bold">العقرب العربي ذو الذيل السمين (Androctonus crassicauda)</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <img src="https://www.joelsartore.com/wp-content/uploads/stock/INV003/INV003-00131-1920x1280.jpg" alt="العقرب العربي ذو الذيل السمين" class="w-full rounded-lg">
+                        </div>
+                        <div>
+                            <p class="mb-2"><strong>الاسم العلمي:</strong> Androctonus crassicauda</p>
+                            <p class="mb-2"><strong>الاسم المحلي:</strong> العقرب العربي ذو الذيل السمين</p>
+                            <p class="mb-2"><strong>مستوى السمية:</strong> <span class="toxicity-high px-2 py-1 rounded">شديد الخطورة، قد يكون قاتلاً</span></p>
+                            <p class="mb-2"><strong>خصائص السم:</strong> سم عصبي يؤثر على الجهاز العصبي.</p>
+                            <p class="mb-2"><strong>الأعراض:</strong> ألم شديد، تورم، حمى، صعوبة في التنفس، ارتعاش عضلي، زيادة معدل ضربات القلب.</p>
+                            <p class="mb-2"><strong>العلاج:</strong> إعطاء المصل المضاد، رعاية داعمة، إدارة الألم.</p>
+                        </div>
+                    </div>
+                </div>
+ 
+                 
+                 <div class="mt-8 mb-8 border-t-4 border-purple-600 pt-4">
+                    <h4 class="text-xl font-bold">هيميسكربيوس ليبتوروس (Hemiscorpius lepturus)</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div><img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Hemiscorpius_lepturus_%2810.3897-evolsyst.3.37464%29_Figure_24.jpg" alt="عقرب هيميسكربيوس ليبتوروس" class="w-full rounded-lg"></div>
+                        <div>
+                            <p class="mb-2"><strong>الاسم العلمي:</strong> Hemiscorpius lepturus</p>
+                            <p class="mb-2"><strong>الاسم المحلي:</strong> العقرب الأصفر</p>
+                            <p class="mb-2"><strong>مستوى السمية:</strong> <span class="toxicity-high px-2 py-1 rounded">شديد الخطورة بسم خلوي</span></p>
+                            <p class="mb-2"><strong>خصائص السم:</strong> سم خلوي (Cytotoxic) يسبب تلف الأنسجة والنخر.</p>
+                            <p class="mb-2"><strong>الأعراض:</strong> ألم خفيف مبدئي يتبعه التهاب شديد، آفات نخرية، انحلال الدم، فشل كلوي محتمل.</p>
+                            <p class="mb-2"><strong>العلاج:</strong> مصل مضاد خاص، عناية بالجروح النخرية، مراقبة وظائف الكلى.</p>
+                        </div>
+                    </div>
+                 </div>
+                 
+                 <div class="mt-8 mb-8 border-t-4 border-purple-600 pt-4">
+                     <h4 class="text-xl font-bold">عنكبوت الأرملة السوداء (Latrodectus spp.)</h4>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                         <div><img src="https://upload.wikimedia.org/wikipedia/commons/9/9c/Latrodectus_hesperus_Berkeley%2C_California.jpg" alt="عنكبوت الأرملة السوداء" class="w-full rounded-lg"></div>
+                         <div>
+                             <p class="mb-2"><strong>الاسم العلمي:</strong> Latrodectus spp. (على الأرجح L. pallidus في العراق)</p>
+                             <p class="mb-2"><strong>الاسم المحلي:</strong> الأرملة البيضاء/السوداء</p>
+                              <p class="mb-2"><strong>مستوى السمية:</strong> <span class="toxicity-medium px-2 py-1 rounded">متوسط إلى مرتفع</span></p>
+                             <p class="mb-2"><strong>أعراض اللدغة:</strong> ألم خفيف مبدئي، يتبعه تشنجات عضلية شديدة، ألم بطني، تعرق، ارتفاع ضغط الدم.</p>
+                             <p class="mb-2"><strong>خيارات العلاج:</strong> مصل مضاد (إن وجد)، مرخيات العضلات، إدارة الألم.</p>
+                             <p class="mb-2"><strong>الموئل:</strong> المناطق المظلمة والجافة مثل المباني الخارجية والأنقاض.</p>
+                         </div>
+                     </div>
+                 </div>
+                 {/* Saw-scaled Viper */}
+                 <div class="mt-8 mb-8 border-t-4 border-purple-600 pt-4">
+                     <h4 class="text-xl font-bold">الأفعى الحارية (Echis carinatus)</h4>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                         <div><img src="https://upload.wikimedia.org/wikipedia/commons/f/ff/Saw-scaled_Viper_%28Echis_carinatus%29_Photographed_By_Shantanu_Kuveskar.jpg" alt="الأفعى الحارية" class="w-full rounded-lg"></div>
+                         <div>
+                             <p class="mb-2"><strong>الاسم العلمي:</strong> Echis carinatus</p>
+                             <p class="mb-2"><strong>خصائص السم:</strong> سم دموي (Hemotoxic) يؤثر على تخثر الدم.</p>
+                             <p class="mb-2"><strong>السمية:</strong> <span class="toxicity-high px-2 py-1 rounded">شديدة السمية، قد تكون قاتلة بدون علاج</span></p>
+                             <p class="mb-2"><strong>الإسعافات الأولية:</strong> تثبيت الطرف المصاب، إزالة المجوهرات/الملابس الضيقة، طلب المساعدة الطبية فوراً.</p>
+                             <p class="mb-2"><strong>المصل المتوفر:</strong> مصل متعدد التكافؤ فعال ضد أنواع Echis.</p>
+                             <p class="mb-2"><strong>التوزيع الجغرافي في العراق:</strong> منتشرة في جميع أنحاء العراق، خاصة المناطق القاحلة.</p>
+                         </div>
+                     </div>
+                 </div>
+                 
+                 <div class="mt-8 mb-8 border-t-4 border-purple-600 pt-4">
+                    <h4 class="text-xl font-bold">الأفعى المقرنة (Cerastes cerastes)</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div><img src="https://c8.alamy.com/comp/P4EMJE/close-up-portrait-of-a-desert-horned-viper-snake-cerastes-cerastes-P4EMJE.jpg" alt="الأفعى المقرنة" class="w-full rounded-lg"></div>
+                        <div>
+                            <p class="mb-2"><strong>الاسم العلمي:</strong> Cerastes cerastes</p>
+                            <p class="mb-2"><strong>خصائص السم:</strong> سم خلوي ودموي.</p>
+                            <p class="mb-2"><strong>السمية:</strong> <span class="toxicity-medium px-2 py-1 rounded">متوسطة إلى عالية السمية، نادراً ما تكون قاتلة مع العلاج المناسب</span></p>
+                            <p class="mb-2"><strong>الإسعافات الأولية:</strong> مشابهة للأفعى الحارية - التثبيت، طلب المساعدة.</p>
+                            <p class="mb-2"><strong>المصل المتوفر:</strong> مصل متعدد التكافؤ للأفاعي.</p>
+                            <p class="mb-2"><strong>التوزيع الجغرافي في العراق:</strong> المناطق الصحراوية والرملية.</p>
+                        </div>
+                    </div>
+                 </div>
+                 
+                 <div class="mt-8 mb-8 border-t-4 border-purple-600 pt-4">
+                    <h4 class="text-xl font-bold">أفعى المشرق (Macrovipera lebetina)</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div><img src="https://images.squarespace-cdn.com/content/v1/654e02304d3a7802ec18d2cd/0a24efcd-1704-43ac-802b-44ebf714f186/Z09_7418+Blunt-Nosed+Viper-Standard-DeNoiseAI-standard.jpeg" alt="أفعى المشرق" class="w-full rounded-lg"></div>
+                        <div>
+                            <p class="mb-2"><strong>الاسم العلمي:</strong> Macrovipera lebetina</p>
+                            <p class="mb-2"><strong>خصائص السم:</strong> سم دموي قوي.</p>
+                            <p class="mb-2"><strong>السمية:</strong> <span class="toxicity-high px-2 py-1 rounded">شديدة الخطورة، تسبب تأثيرات جهازية خطيرة</span></p>
+                            <p class="mb-2"><strong>الإسعافات الأولية:</strong> التثبيت، تهدئة المصاب، طلب المساعدة فوراً.</p>
+                            <p class="mb-2"><strong>المصل المتوفر:</strong> مصل خاص بـ Macrovipera أو مصل متعدد التكافؤ.</p>
+                            <p class="mb-2"><strong>التوزيع الجغرافي في العراق:</strong> المناطق الغربية والوسطى.</p>
+                        </div>
+                    </div>
+                 </div>
+            </section>
+
+            <!-- تنبيه صحي -->
+            <div class="bg-purple-100 rounded-lg p-6 mb-8 no-print">
+                <h3 class="text-xl font-bold text-purple-800 mb-3">تنبيه صحي</h3>
+                <p class="text-gray-800">في حال التعرض للدغة أو لسعة من أي من هذه المخلوقات السامة، اطلب العناية الطبية فورًا. لا تحاول الإمساك بالحيوان، ولكن إذا كان ذلك آمنًا، قد يساعد التقاط صورة له في التعرف عليه وتقديم العلاج المناسب.</p>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-gray-800 text-white py-6 px-4 text-center no-print">
+            <p>معرض الكائنات السامة في العراق - الياس خضر - 2025</p>
+            <p class="text-sm mt-2 text-gray-400">استشر دائمًا المهنيين الطبيين للحصول على العلاج المناسب للدغات ولسعات المخلوقات السامة.</p>
+        </footer>
+    </div>
+
+    <!-- النوافذ المنبثقة (Modals) -->
+    
+
+    <div id="scorpion1" class="modal no-print" role="dialog" aria-modal="true" aria-labelledby="scorpion1-title">
+        <div class="modal-content">
+
+            <button class="close" data-modal-close aria-label="إغلاق النافذة">×</button>
+            <h2 id="scorpion1-title" class="text-2xl font-bold mb-4 text-purple-800">العقرب العربي ذو الذيل السمين</h2>
+            <div class="info-grid">
+
+                <div>
+                    <div class="info-item">
+                        <h3 class="font-bold text-lg">الاسم العلمي</h3>
+                        <p class="text-gray-700">Androctonus crassicauda</p>
+                    </div>
+                    <div class="info-item">
+                        <h3 class="font-bold text-lg">الاسم المحلي</h3>
+                        <p class="text-gray-700">العقرب العربي ذو الذيل السمين</p>
+                    </div>
+                    <div class="info-item">
+                        <h3 class="font-bold text-lg">خصائص السم</h3>
+                        <p class="text-gray-700">سم عصبي (Neurotoxic) يؤثر بشكل أساسي على الجهاز العصبي، مسببًا مجموعة من الأعراض الخطيرة عن طريق تعطيل وظائف الأعصاب الطبيعية.</p>
+                    </div>
+                    <div class="info-item">
+                        <h3 class="font-bold text-lg">الأعراض</h3>
+                        <ul class="list-disc pr-5 text-gray-700"> {/* pr-5 for RTL */}
+                            <li>ألم شديد فوري في موقع اللسعة</li>
+                            <li>تورم والتهاب</li>
+                            <li>حمى</li>
+                            <li>صعوبة في التنفس</li>
+                            <li>ارتعاش وتشنجات عضلية</li>
+                            <li>زيادة معدل ضربات القلب</li>
+                            <li>في الحالات الشديدة، فشل تنفسي</li>
+                        </ul>
+                    </div>
+                    <div class="info-item">
+                        <h3 class="font-bold text-lg">العلاج</h3>
+                        <ul class="list-disc pr-5 text-gray-700">
+                            <li>إعطاء المصل المضاد المحدد (ضروري في الحالات الشديدة)</li>
+                            <li>رعاية داعمة في منشأة طبية</li>
+                            <li>إدارة الألم</li>
+                            <li>مراقبة العلامات الحيوية</li>
+                            <li>معالجة المضاعفات التنفسية إذا لزم الأمر</li>
+                        </ul>
+                    </div>
+                </div>
+                 <div>
+                    <img src="https://www.joelsartore.com/wp-content/uploads/stock/INV003/INV003-00131-1920x1280.jpg" alt="العقرب العربي ذو الذيل السمين" class="info-img mb-4">
+
+                    <div class="px-4 py-2 toxicity-high text-center rounded-lg mb-4">
+                        <span class="font-bold">سمية عالية</span> - قد يكون قاتلاً
+                    </div>
+                 </div>
+            </div>
+            <div class="mt-6 bg-gray-100 p-4 rounded-lg">
+                <p class="text-sm text-gray-600"><i class="fas fa-info-circle ml-2"></i> يعتبر هذا النوع من أخطر العقارب في العراق وهو مسؤول عن العديد من حالات التسمم الخطيرة سنويًا. العناية الطبية الفورية ضرورية بعد اللسعة.</p>
+            </div>
+        </div>
+    </div>
+
+ 
+    <div id="scorpion2" class="modal no-print" role="dialog" aria-modal="true" aria-labelledby="scorpion2-title">
+        <div class="modal-content">
+            <button class="close" data-modal-close aria-label="إغلاق النافذة">×</button>
+            <h2 id="scorpion2-title" class="text-2xl font-bold mb-4 text-purple-800">هيميسكربيوس ليبتوروس (العقرب الأصفر)</h2>
+            <div class="info-grid">
+                <div>
+                     <div class="info-item"><h3 class="font-bold text-lg">الاسم العلمي</h3><p class="text-gray-700">Hemiscorpius lepturus</p></div>
+                     <div class="info-item"><h3 class="font-bold text-lg">الاسم المحلي</h3><p class="text-gray-700">العقرب الأصفر</p></div>
+                     <div class="info-item"><h3 class="font-bold text-lg">خصائص السم</h3><p class="text-gray-700">سم خلوي (Cytotoxic) شديد التأثير يسبب تلف وتدمير الأنسجة. بخلاف معظم العقارب، يهاجم سم هذا النوع الأنسجة بشكل أساسي بدلاً من الجهاز العصبي.</p></div>
+                     <div class="info-item">
+                        <h3 class="font-bold text-lg">الأعراض</h3>
+                        <ul class="list-disc pr-5 text-gray-700">
+                            <li>ألم خفيف مبدئي (أقل إيلامًا بشكل خادع من لسعات العقارب الأخرى)</li>
+                            <li>التهاب شديد يتطور بعد ساعات أو أيام</li>
+                            <li>آفات نخرية وتدمير للأنسجة</li>
+                            <li>انحلال الدم (تدمير خلايا الدم الحمراء)</li>
+                            <li>احتمال حدوث فشل كلوي</li>
+                            <li>قد تتطور تأثيرات جهازية خطيرة بعد 24-48 ساعة من اللسعة</li>
+                        </ul>
+                     </div>
+                     <div class="info-item">
+                        <h3 class="font-bold text-lg">العلاج</h3>
+                        <ul class="list-disc pr-5 text-gray-700">
+                            <li>المصل المضاد المحدد لنوع Hemiscorpius (حاسم)</li>
+                            <li>العناية بالجروح للآفات النخرية</li>
+                            <li>مراقبة وظائف الكلى</li>
+                            <li>عادة ما يتطلب الأمر دخول المستشفى</li>
+                            <li>قد تكون الجراحة ضرورية لتلف الأنسجة الشديد</li>
+                            <li>رعاية داعمة ومراقبة دقيقة</li>
+                        </ul>
+                     </div>
+                 </div>
+                 <div>
+                     <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Hemiscorpius_lepturus_%2810.3897-evolsyst.3.37464%29_Figure_24.jpg" alt="عقرب هيميسكربيوس ليبتوروس" class="info-img mb-4">
+                     <div class="px-4 py-2 toxicity-high text-center rounded-lg mb-4">
+                         <span class="font-bold">سمية عالية</span> - سم خلوي
+                     </div>
+                 </div>
+            </div>
+            <div class="mt-6 bg-gray-100 p-4 rounded-lg">
+                <p class="text-sm text-gray-600"><i class="fas fa-exclamation-triangle text-red-600 ml-2"></i> <strong>تحذير:</strong> هذا العقرب خطير بشكل خاص لأن لسعته قد تبدو خفيفة في البداية، ولكنها يمكن أن تؤدي إلى ردود فعل متأخرة شديدة. قد لا يطلب المصاب العلاج في البداية بسبب الألم البسيط، مما قد يؤدي إلى مضاعفات خطيرة لاحقًا.</p>
+            </div>
+        </div>
+    </div>
+
+
+    
+     <div id="spider1" class="modal no-print" role="dialog" aria-modal="true" aria-labelledby="spider1-title">
+         <div class="modal-content">
+            <button class="close" data-modal-close aria-label="إغلاق النافذة">×</button>
+            <h2 id="spider1-title" class="text-2xl font-bold mb-4 text-purple-800">عنكبوت الأرملة السوداء</h2>
+            <div class="info-grid">
+                <div>
+                    <div class="info-item"><h3 class="font-bold text-lg">الاسم العلمي</h3><p class="text-gray-700">Latrodectus spp. (على الأرجح L. pallidus في العراق)</p></div>
+                    <div class="info-item"><h3 class="font-bold text-lg">الاسم المحلي</h3><p class="text-gray-700">الأرملة البيضاء/السوداء</p></div>
+                    <div class="info-item">
+                        <h3 class="font-bold text-lg">أعراض اللدغة</h3>
+                        <ul class="list-disc pr-5 text-gray-700">
+                            <li>ألم خفيف مبدئي كوخز الدبوس</li>
+                            <li>يتطور إلى تشنجات عضلية شديدة خلال 30-60 دقيقة</li>
+                            <li>تصلب وألم في البطن</li>
+                            <li>تعرق غزير</li>
+                            <li>ارتفاع ضغط الدم</li>
+                            <li>غثيان وقيء</li>
+                            <li>صداع</li>
+                            <li>قد تستمر الأعراض لمدة 3-7 أيام بدون علاج</li>
+                        </ul>
+                    </div>
+                    <div class="info-item">
+                        <h3 class="font-bold text-lg">خيارات العلاج</h3>
+                        <ul class="list-disc pr-5 text-gray-700">
+                            <li>مصل مضاد محدد (إن وجد وفي الحالات الشديدة)</li>
+                            <li>مرخيات العضلات</li>
+                            <li>إدارة الألم</li>
+                            <li>قد يساعد جلوكونات الكالسيوم في تخفيف التشنجات العضلية</li>
+                            <li>رعاية داعمة</li>
+                            <li>دخول المستشفى للمراقبة في الحالات الشديدة</li>
+                        </ul>
+                    </div>
+                    <div class="info-item"><h3 class="font-bold text-lg">الموئل والسلوك</h3><p class="text-gray-700">توجد في جميع أنحاء المنطقة، غالبًا في المناطق المظلمة والجافة مثل المباني الخارجية والمهجورة والأنقاض. عادة ما تبني شبكات غير منتظمة وتنشط ليلاً. ليست عدوانية وعادة ما تلدغ فقط عند تهديدها أو إزعاجها.</p></div>
+                 </div>
+                 <div>
+                     <img src="https://upload.wikimedia.org/wikipedia/commons/9/9c/Latrodectus_hesperus_Berkeley%2C_California.jpg" alt="عنكبوت الأرملة السوداء" class="info-img mb-4">
+                     <div class="px-4 py-2 toxicity-medium text-center rounded-lg mb-4">
+                         <span class="font-bold">سمية متوسطة إلى عالية</span>
+                     </div>
+                 </div>
+            </div>
+            <div class="mt-6 bg-gray-100 p-4 rounded-lg">
+                <p class="text-sm text-gray-600"><i class="fas fa-info-circle ml-2"></i> بينما نادرًا ما تكون قاتلة للبالغين الأصحاء، يمكن أن تكون لدغات الأرملة السوداء خطيرة بشكل خاص للأطفال وكبار السن والأفراد ذوي المناعة الضعيفة. تساعد العلامة الحمراء المميزة التي تشبه الساعة الرملية على الجانب السفلي في التعرف عليها.</p>
+            </div>
+        </div>
+     </div>
+
+    
+     <div id="snake1" class="modal no-print" role="dialog" aria-modal="true" aria-labelledby="snake1-title">
+         <div class="modal-content">
+             <button class="close" data-modal-close aria-label="إغلاق النافذة">×</button>
+             <h2 id="snake1-title" class="text-2xl font-bold mb-4 text-purple-800">الأفعى الحارية (الحنش أو ام جنيب)</h2>
+             <div class="info-grid">
+                 <div>
+                     <div class="info-item"><h3 class="font-bold text-lg">الاسم العلمي</h3><p class="text-gray-700">Echis carinatus</p></div>
+                     <div class="info-item"><h3 class="font-bold text-lg">خصائص السم</h3><p class="text-gray-700">سم دموي (Hemotoxic) قوي للغاية يؤثر بشكل أساسي على تخثر الدم. يحتوي السم على مركبات تسبب اعتلال التخثر (اضطراب تخثر الدم)، مما يؤدي إلى نزيف داخلي وانهيار محتمل في القلب والأوعية الدموية.</p></div>
+                     <div class="info-item"><h3 class="font-bold text-lg">السمية</h3><p class="text-gray-700">من أخطر الأفاعي في المنطقة. بدون علاج مناسب، يمكن أن تكون معدلات الوفيات مرتفعة. كمية السم صغيرة نسبيًا، لكنها قوية للغاية.</p></div>
+                     <div class="info-item">
+                         <h3 class="font-bold text-lg">الإسعافات الأولية</h3>
+                         <ul class="list-disc pr-5 text-gray-700">
+                             <li>تثبيت الطرف المصاب</li>
+                             <li>إزالة المجوهرات والملابس الضيقة</li>
+                             <li>الحفاظ على هدوء المصاب وتقليل حركته</li>
+                             <li>طلب المساعدة الطبية فورًا</li>
+                             <li><strong>لا تقم</strong> بجرح مكان اللدغة أو محاولة شفط السم أو استخدام العاصبة (التورنيكيه).</li>
+                             <li><strong>لا تقم</strong> بوضع ثلج أو حرارة على منطقة اللدغة.</li>
+                         </ul>
+                     </div>
+                     <div class="info-item"><h3 class="font-bold text-lg">المصل المتوفر</h3><p class="text-gray-700">المصل متعدد التكافؤ الفعال ضد أنواع Echis هو العلاج الأساسي. في العراق، تتوفر الأمصال المحددة في المرافق الطبية الكبرى.</p></div>
+                     <div class="info-item"><h3 class="font-bold text-lg">التوزيع الجغرافي</h3><p class="text-gray-700">توجد في جميع أنحاء العراق، خاصة في المناطق القاحلة. شائعة في المناطق الصخرية ومجاري الأنهار الجافة والتضاريس الصحراوية.</p></div>
+                 </div>
+                 <div>
+                     <img src="https://upload.wikimedia.org/wikipedia/commons/f/ff/Saw-scaled_Viper_%28Echis_carinatus%29_Photographed_By_Shantanu_Kuveskar.jpg" alt="الأفعى الحارية" class="info-img mb-4">
+                     <div class="px-4 py-2 toxicity-high text-center rounded-lg mb-4">
+                         <span class="font-bold">سمية عالية</span> - قد تكون قاتلة
+                     </div>
+                 </div>
+             </div>
+             <div class="mt-6 bg-gray-100 p-4 rounded-lg">
+                 <p class="text-sm text-gray-600"><i class="fas fa-exclamation-triangle text-red-600 ml-2"></i> <strong>تحذير:</strong> حصل هذا النوع على اسمه من الصوت الحاد الذي يصدره عن طريق حك قشوره ببعضها البعض عند التهديد. وهي عدوانية عند إزعاجها ومسؤولة عن العديد من حالات لدغات الأفاعي في العراق. يوفر لونها تمويهًا ممتازًا، مما يجعل من الصعب اكتشافها.</p>
+             </div>
+         </div>
+     </div>
+
+    
+    <div id="snake2" class="modal no-print" role="dialog" aria-modal="true" aria-labelledby="snake2-title">
+         <div class="modal-content">
+            <button class="close" data-modal-close aria-label="إغلاق النافذة">×</button>
+            <h2 id="snake2-title" class="text-2xl font-bold mb-4 text-purple-800">الأفعى المقرنة</h2>
+            <div class="info-grid">
+                <div>
+                    <div class="info-item"><h3 class="font-bold text-lg">الاسم العلمي</h3><p class="text-gray-700">Cerastes cerastes</p></div>
+                    <div class="info-item"><h3 class="font-bold text-lg">خصائص السم</h3><p class="text-gray-700">مزيج من السم الخلوي والدموي. يسبب تلفًا موضعيًا للأنسجة ويمكن أن يؤثر على تخثر الدم، وإن كان عادة أقل حدة من الأفعى الحارية.</p></div>
+                    <div class="info-item"><h3 class="font-bold text-lg">السمية</h3><p class="text-gray-700">شديدة السمية ولكن نادرًا ما تكون قاتلة مع العلاج المناسب. السم متوسط القوة ولكنه يمكن أن يسبب اعتلالًا كبيرًا بدون تدخل طبي.</p></div>
+                    <div class="info-item">
+                        <h3 class="font-bold text-lg">الإسعافات الأولية</h3>
+                        <ul class="list-disc pr-5 text-gray-700">
+                            <li>مشابهة لعلاج الأفعى الحارية</li>
+                            <li>تثبيت الطرف المصاب</li>
+                            <li>الحفاظ على هدوء المريض وثباته</li>
+                            <li>طلب المساعدة الطبية فورًا</li>
+                            <li><strong>لا تستخدم</strong> العلاجات التقليدية أو الجرح.</li>
+                            <li><strong>لا تحاول</strong> الإمساك بالأفعى أو قتلها.</li>
+                        </ul>
+                    </div>
+                    <div class="info-item"><h3 class="font-bold text-lg">المصل المتوفر</h3><p class="text-gray-700">المصل متعدد التكافؤ للأفاعي فعال. معظم المرافق الطبية الكبرى في العراق لديها الأمصال المناسبة.</p></div>
+                    <div class="info-item"><h3 class="font-bold text-lg">التوزيع الجغرافي</h3><p class="text-gray-700">المناطق الصحراوية والرملية في جميع أنحاء العراق. غالبًا ما توجد مدفونة جزئيًا في الرمال بحيث لا يظهر سوى العينين والقرون.</p></div>
+                 </div>
+                 <div>
+                     <img src="https://c8.alamy.com/comp/P4EMJE/close-up-portrait-of-a-desert-horned-viper-snake-cerastes-cerastes-P4EMJE.jpg" alt="الأفعى المقرنة" class="info-img mb-4">
+                     <div class="px-4 py-2 toxicity-medium text-center rounded-lg mb-4">
+                         <span class="font-bold">سمية متوسطة إلى عالية</span>
+                     </div>
+                 </div>
+            </div>
+            <div class="mt-6 bg-gray-100 p-4 rounded-lg">
+                 <p class="text-sm text-gray-600"><i class="fas fa-info-circle ml-2"></i> القشور المميزة التي تشبه القرون فوق العينين تعطي هذه الأفعى اسمها. لا تمتلك جميع الأفراد قرونًا مرئية. هذه الأفاعي ليلية بشكل أساسي وتستخدم الحركة الجانبية (sidewinding). إنها مفترسات كمائن غالبًا ما تختبئ في الرمال ولا يظهر منها سوى عيونها.</p>
+            </div>
+        </div>
+    </div>
+
+    
+    <div id="snake3" class="modal no-print" role="dialog" aria-modal="true" aria-labelledby="snake3-title">
+        <div class="modal-content">
+             <button class="close" data-modal-close aria-label="إغلاق النافذة">×</button>
+             <h2 id="snake3-title" class="text-2xl font-bold mb-4 text-purple-800">أفعى المشرق (الكوبرا الكاذبة)</h2>
+             <div class="info-grid">
+                 <div>
+                     <div class="info-item"><h3 class="font-bold text-lg">الاسم العلمي</h3><p class="text-gray-700">Macrovipera lebetina</p></div>
+                     <div class="info-item"><h3 class="font-bold text-lg">خصائص السم</h3><p class="text-gray-700">سم دموي قوي يؤثر على تخثر الدم ويمكن أن يسبب تلفًا واسعًا للأنسجة. يحتوي السم على إنزيمات تحلل الأنسجة وتؤثر على وظائف القلب والأوعية الدموية.</p></div>
+                     <div class="info-item"><h3 class="font-bold text-lg">السمية</h3><p class="text-gray-700">شديدة الخطورة، يمكن أن تسبب تأثيرات جهازية خطيرة. نظرًا لحجمها الكبير، يمكن لهذه الأفعى حقن كمية كبيرة من السم في لدغة واحدة.</p></div>
+                     <div class="info-item">
+                         <h3 class="font-bold text-lg">الإسعافات الأولية</h3>
+                         <ul class="list-disc pr-5 text-gray-700">
+                             <li>تثبيت الطرف المصاب</li>
+                             <li>الحفاظ على هدوء المصاب لإبطاء انتشار السم</li>
+                             <li>إزالة الأشياء الضيقة مثل الخواتم أو الساعات</li>
+                             <li>طلب العناية الطبية فورًا</li>
+                             <li>إذا أمكن، لاحظ وقت اللدغة ومظهر الأفعى</li>
+                             <li><strong>لا تستخدم</strong> العلاجات التقليدية أو الجرح أو الشفط.</li>
+                         </ul>
+                     </div>
+                     <div class="info-item"><h3 class="font-bold text-lg">المصل المتوفر</h3><p class="text-gray-700">مصل مضاد خاص بـ Macrovipera أو مصل متعدد التكافؤ للأفاعي. يجب إعطاؤه في أسرع وقت ممكن بعد اللدغة.</p></div>
+                     <div class="info-item"><h3 class="font-bold text-lg">التوزيع الجغرافي</h3><p class="text-gray-700">المناطق الغربية والوسطى من العراق، خاصة في التلال الصخرية والمنحدرات والمناطق الزراعية. يمكن أن تتكيف مع مجموعة متنوعة من الموائل.</p></div>
+                 </div>
+                 <div>
+                     <img src="https://images.squarespace-cdn.com/content/v1/654e02304d3a7802ec18d2cd/0a24efcd-1704-43ac-802b-44ebf714f186/Z09_7418+Blunt-Nosed+Viper-Standard-DeNoiseAI-standard.jpeg" alt="أفعى المشرق" class="info-img mb-4">
+                     <div class="px-4 py-2 toxicity-high text-center rounded-lg mb-4">
+                         <span class="font-bold">سمية عالية</span> - شديدة الخطورة
+                     </div>
+                 </div>
+             </div>
+             <div class="mt-6 bg-gray-100 p-4 rounded-lg">
+                 <p class="text-sm text-gray-600"><i class="fas fa-exclamation-triangle text-red-600 ml-2"></i> <strong>تحذير:</strong> هذه واحدة من أكبر الأفاعي في المنطقة، وقد يصل طولها إلى أكثر من 1.5 متر. حجمها الكبير يعني أنها يمكن أن تحقن جرعة كبيرة من السم. رأسها العريض وغير الحاد يمنحها الاسم البديل "الأفعى مفلطحة الأنف".</p>
+             </div>
+         </div>
+    </div>
+
+
+    <script>
+        // --- نفس كود JavaScript المُحسَّن ولكن بدون تعليقات لتوفير المساحة ---
+        // (الكود هو نفسه الموجود في الرد السابق باللغة الإنجليزية)
+
+        const creatureCards = document.querySelectorAll('.creature-card');
+        const closeButtons = document.querySelectorAll('[data-modal-close]');
+        const modals = document.querySelectorAll('.modal');
+        let lastFocusedElement = null;
+
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (!modal) return;
+
+            lastFocusedElement = document.activeElement;
+            modal.style.display = "flex";
+
+            setTimeout(() => {
+                modal.classList.add('active');
+                document.body.style.overflow = "hidden";
+
+                const focusableElements = modal.querySelectorAll(
+                    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                );
+                const firstFocusable = focusableElements[0];
+                const lastFocusable = focusableElements[focusableElements.length - 1];
+
+                if (firstFocusable) firstFocusable.focus();
+
+                modal.dataset.firstFocusable = firstFocusable; // Store for removal
+                modal.dataset.lastFocusable = lastFocusable;  // Store for removal
+                modal.boundTrapTabKey = trapTabKey.bind(null, firstFocusable, lastFocusable); // Bind args
+                modal.addEventListener('keydown', modal.boundTrapTabKey);
+
+            }, 10);
+        }
+
+        function closeModal(modal) {
+             if (!modal || !modal.classList.contains('active')) return;
+
+            modal.removeEventListener('keydown', modal.boundTrapTabKey); // Remove specific listener instance
+            delete modal.boundTrapTabKey; // Clean up property
+
+            modal.classList.remove('active');
+
+            function handleTransitionEnd() {
+                 modal.style.display = "none";
+                 document.body.style.overflow = "auto";
+                 if (lastFocusedElement) lastFocusedElement.focus();
+                 modal.removeEventListener('transitionend', handleTransitionEnd);
+            }
+
+            modal.addEventListener('transitionend', handleTransitionEnd, { once: true });
+
+             // Fallback
+             setTimeout(() => {
+                 if (modal.style.display !== "none") {
+                     modal.style.display = "none";
+                     document.body.style.overflow = "auto";
+                     if (lastFocusedElement) lastFocusedElement.focus();
+                 }
+             }, 400);
+        }
+
+        function trapTabKey(firstFocusable, lastFocusable, e) { // Receive bound args
+            if (!firstFocusable || !lastFocusable) return; // Check if elements exist
+            if (e.key !== 'Tab') return;
+
+            if (e.shiftKey) {
+                if (document.activeElement === firstFocusable) {
+                    e.preventDefault();
+                    lastFocusable.focus();
+                }
+            } else {
+                if (document.activeElement === lastFocusable) {
+                    e.preventDefault();
+                    firstFocusable.focus();
+                }
+            }
+        }
+
+        creatureCards.forEach(card => {
+            const modalId = card.dataset.modalTarget;
+            if (modalId) {
+                card.addEventListener('click', () => openModal(modalId));
+                card.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        openModal(modalId);
+                    }
+                });
+            }
+        });
+
+        closeButtons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                const modal = event.target.closest('.modal');
+                closeModal(modal);
+            });
+        });
+
+        window.addEventListener('click', (event) => {
+            modals.forEach(modal => {
+                if (event.target === modal && modal.classList.contains('active')) {
+                    closeModal(modal);
+                }
+            });
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === "Escape") {
+                const activeModal = document.querySelector('.modal.active');
+                if (activeModal) {
+                    closeModal(activeModal);
+                }
+            }
+        });
+
+    </script>
+</body>
+</html>
